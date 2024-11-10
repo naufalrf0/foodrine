@@ -29,7 +29,7 @@ const FaqSection = () => {
             </AccordionTrigger>
             <AccordionContent className="text-white">
               Anda bisa mendonasikan sisa makanan rumah tangga melalui aplikasi
-              FoodrinE. Pilih opsi "Donasi" dan ikuti petunjuk yang tersedia
+              FoodrinE. Pilih opsi &quot;Donasi&quot; dan ikuti petunjuk yang tersedia
               untuk menyumbangkan makanan Anda ke organisasi di wilayah terdekat.
             </AccordionContent>
           </AccordionItem>
@@ -76,7 +76,7 @@ const FaqSection = () => {
               FoodrinE?
             </AccordionTrigger>
             <AccordionContent className="text-white">
-              Anda dapat mendaftar melalui halaman "Daftar Komunitas" di aplikasi
+              Anda dapat mendaftar melalui halaman &quot;Daftar Komunitas&quot; di aplikasi
               FoodrinE. Isi formulir yang tersedia, dan tim kami akan menghubungi
               Anda untuk proses verifikasi dan detail lebih lanjut.
             </AccordionContent>

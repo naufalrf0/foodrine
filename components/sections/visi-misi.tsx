@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 const VisionMissionSection = () => {
   return (
     <section className="pt-12 bg-white text-center">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
@@ -26,21 +26,21 @@ const HomeHeader: React.FC = () => {
 
   const { data: session } = useSession();
 
-  const controlHeaderVisibility = () => {
+  const controlHeaderVisibility = useCallback(() => {
     if (window.scrollY > lastScrollY && window.scrollY > 50) {
-      setIsHeaderVisible(false); 
+      setIsHeaderVisible(false);
     } else {
-      setIsHeaderVisible(true); 
+      setIsHeaderVisible(true);
     }
     setLastScrollY(window.scrollY);
-  };
+  }, [lastScrollY]);
 
   useEffect(() => {
     window.addEventListener('scroll', controlHeaderVisibility);
     return () => {
       window.removeEventListener('scroll', controlHeaderVisibility);
     };
-  }, [lastScrollY]);
+  }, [controlHeaderVisibility]);
 
   const handleLogout = async () => {
     Swal.fire({
@@ -118,7 +118,7 @@ const HomeHeader: React.FC = () => {
                 </Button>
               </Link>
               <Link href="/auth/login">
-                <Button           
+                <Button
                   variant="link"
                   className="hidden md:block text-orange-400 font-semibold hover:text-orange-500 transition duration-300"
                 >
