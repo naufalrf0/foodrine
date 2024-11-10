@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int           @id @default(autoincrement())
+  name           String
+  email          String        @unique
+  password       String
+  emailVerified  DateTime?
+  image          String?
+  role           RoleEnum
+  userInfo       UserInfo?     @relation("UserToUserInfo")
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId Int?          @map("organization_id")
+  partner        Partner?      @relation(fields: [partnerId], references: [id])
+  partnerId      Int?          @map("partner_id")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  accounts Account[]
+  sessions Session[]
+
+  donations Donation[]
+  purchases Purchase[]
+
+  @@map("users")
+}
+
+model UserInfo {
+  id             Int      @id @default(autoincrement())
+  address        String
+  phoneNumber    String   @map("phone_number")
+  additionalInfo String?  @map("additional_info")
+  userId         Int      @unique
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relasi ke user
+  user User @relation("UserToUserInfo", fields: [userId], references: [id])
+
+  @@map("user_infos")
+}
+
+model Organization {
+  id                       Int      @id @default(autoincrement())
+  name                     String
+  type                     String
+  address                  String
+  phone                    String
+  email                    String
+  website                  String?
+  description              String?
+  operationArea            String   @map("operation_area")
+  foodDistributionCapacity Int      @map("food_distribution_capacity")
+  storageCapacity          Boolean  @map("storage_capacity")
+  transportInfo            String?  @map("transport_info")
+  agreementAccepted        Boolean  @default(false) @map("agreement_accepted")
+  createdAt                DateTime @default(now()) @map("created_at")
+  updatedAt                DateTime @updatedAt @map("updated_at")
+
+  // Relasi ke user dan donation
+  users     User[]
+  donations Donation[]
+
+  @@map("organizations")
+}
+
+model Partner {
+  id                    Int      @id @default(autoincrement())
+  name                  String
+  type                  String
+  address               String
+  phone                 String
+  email                 String
+  website               String?
+  ownerName             String   @map("owner_name")
+  ownerPhone            String   @map("owner_phone")
+  ownerEmail            String   @map("owner_email")
+  foodType              String   @map("food_type")
+  estimatedWastePerWeek Int      @map("estimated_waste_per_week")
+  donationAvailability  String   @map("donation_availability")
+  storageCapacity       Boolean  @map("storage_capacity")
+  transportInfo         String?  @map("transport_info")
+  supportingDocs        String?  @map("supporting_docs")
+  agreementAccepted     Boolean  @default(false) @map("agreement_accepted")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  // Relasi ke user dan surplus
+  users     User[]
+  surpluses Surplus[]
+
+  @@map("partners")
+}
+
+model Surplus {
+  id          Int      @id @default(autoincrement())
+  partner     Partner  @relation(fields: [partnerId], references: [id])
+  partnerId   Int      @map("partner_id")
+  name        String
+  description String
+  quantity    Int
+  unit        String
+  expiryDate  DateTime @map("expiry_date")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relasi ke donation
+  donations Donation[]
+
+  @@map("surpluses")
+}
+
+model Donation {
+  id             Int                @id @default(autoincrement())
+  user           User               @relation(fields: [userId], references: [id])
+  userId         Int                @map("user_id")
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+  organizationId Int                @map("organization_id")
+  surplus        Surplus            @relation(fields: [surplusId], references: [id])
+  surplusId      Int                @map("surplus_id")
+  status         DonationStatusEnum
+  quantity       Int
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
+
+  @@map("donations")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  price       Decimal
+  stock       Int
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relasi ke Purchase
+  purchases Purchase[]
+
+  @@map("products")
+}
+
+model Purchase {
+  id          Int      @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int      @map("user_id")
+  product     Product  @relation(fields: [productId], references: [id])
+  productId   Int      @map("product_id")
+  quantity    Int
+  totalAmount Decimal  @map("total_amount")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("purchases")
+}
+
+model Account {
+  id                Int     @id @default(autoincrement())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  sessionToken String   @unique @map("session_token")
+  user         User     @relation(fields: [userId], references: [id])
+  userId       Int      @map("user_id")
+  expires      DateTime
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id         Int      @id @default(autoincrement())
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@map("verification_tokens")
+}
+
+enum RoleEnum {
+  ADMIN
+  ORGANIZATION
+  PARTNER
+  USER
+}
+
+enum DonationStatusEnum {
+  Pending
+  Accepted
+  Completed
+  Rejected
+}
